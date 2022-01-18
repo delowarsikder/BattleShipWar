@@ -12,7 +12,7 @@ import time
 import random
 
 BOARD_SIZE = 9
-# LENGTH_OF_SHIPS = [2,3,5,4]
+ALL_SHIPS = []
 # ##Define the maximum length of ship
 MAX_SHIP_LENGHT = 5
 NUMBER_OF_SHIP = 2
@@ -110,16 +110,22 @@ def userShipPlacement():
             print('Again!!! Enter a valid letter between A-H')
     return startRow, startColumn, shipOrientation
 
+###create ship length
+def createShipLength():
+    global totalShipLength,ALL_SHIPS
+    for i in range(NUMBER_OF_SHIP):
+        lengthOfShip = random.randint(MAX_SHIP_LENGHT-3, MAX_SHIP_LENGHT)
+        ALL_SHIPS.append(lengthOfShip)
+        totalShipLength=totalShipLength+lengthOfShip
 
 # Place the ship in the ocean
 def shipPlacement(board):
     global totalShipLength
     # loop through length of ships
     random.seed(time.time())
-    for numberOfShip in range(NUMBER_OF_SHIP):
+    for k in range(NUMBER_OF_SHIP):
+        shipLength=ALL_SHIPS[k]
         # loop until ship fits and doesn't overlap
-        shipLength = random.randint(MAX_SHIP_LENGHT-3, MAX_SHIP_LENGHT)
-        totalShipLength=totalShipLength+shipLength
         while True:
             if board==COMPUTER_BOARD:
                 shipOrientation = random.choice(["H", "V"])
@@ -180,7 +186,7 @@ def shipPlacement(board):
 def userShootingPosion():
     while True:
         try:
-            startRow = int(input("Enter the row 1-9 of the ship start: "))
+            startRow = int(input("Enter the row number between (1-9) of the shoot posion: "))
             startRow=startRow-1
             if(0<=startRow<BOARD_SIZE):
                 break
@@ -191,14 +197,14 @@ def userShootingPosion():
     while True:
         try:
             column = input(
-                "Enter the column (A-I) of the ship start: ").upper()
+                "Enter the column name between(A-I) of the shoot posion: ").upper()
             if column in LETTER:
                 startColumn=int(ord(column)-ord('A'))
                 break
             else:
                 print('Wrong!!! Again...',end='')
         except KeyError:
-            print('Again!!! Enter a valid letter between A-H')
+            print('Again!!! Enter a valid letter between A-I')
     return startRow, startColumn
 
 ###counter check who is alive Human or AI
@@ -231,10 +237,15 @@ def shootTheBoard(board):
             COMPUTER_GUESS_BOARD[hitRow][hitColumn]="*"
 
 def main():
-    print("Computer")
+    ##this function randomly creat a ship length 
+    createShipLength()
+
+    print("Computer Board")
     shipPlacement(COMPUTER_BOARD)
     print_board(COMPUTER_BOARD)
-
+    
+    print("\n\nYour Sample Board")
+    print_board(PLAYER_BOARD)
     shipPlacement(PLAYER_BOARD)
 
     aiAgentAlive=True
@@ -244,6 +255,7 @@ def main():
 
     while aiAgentAlive and humanAgentAlive:
         while humanAgentTurn:
+            print("Guess Board where you shoot")
             print_board(PLAYER_GUESS_BOARD)
             print("Guess the Agent ship:")
             shootTheBoard(PLAYER_GUESS_BOARD)
