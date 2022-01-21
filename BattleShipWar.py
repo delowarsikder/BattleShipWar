@@ -1,13 +1,3 @@
-# https://github.com/gbrough/battleship/blob/main/5_ship_types_with_computer.py
-
-'''
-  Legend:
-    1. "." = water or empty space
-    2. "O" = part of ship
-    3. "X" = part of ship that was hit with bullet
-    4. "*" = water that was shot with bullet, a miss because it hit no ship
-'''
-
 import time
 import random
 
@@ -15,21 +5,27 @@ BOARD_SIZE = 9
 ALL_SHIPS = []
 # ##Define the maximum length of ship
 MAX_SHIP_LENGHT = 5
-NUMBER_OF_SHIP = 2
+NUMBER_OF_SHIP = 1
 
-totalShipLength=0
+totalShipLength = 0
+
+# symbol
+boatSymbol = "@"
+waterSymbol = "~"
+hitShotSymbol = "X"
+missShotSymbol = "*"
 
 # Boad already created
 # player own board
-PLAYER_BOARD = [["."] * BOARD_SIZE for i in range(BOARD_SIZE)]
+HUMAN_BOARD = [[waterSymbol] * BOARD_SIZE for i in range(BOARD_SIZE)]
 # AI agent own board
-COMPUTER_BOARD = [["."] * BOARD_SIZE for i in range(BOARD_SIZE)]
+AI_BOARD = [[waterSymbol] * BOARD_SIZE for i in range(BOARD_SIZE)]
 # both invisible to each other
 # AI board that guess by player
-PLAYER_GUESS_BOARD = [["."] * BOARD_SIZE for i in range(BOARD_SIZE)]
+HUMAN_GUESS_BOARD = [[waterSymbol] * BOARD_SIZE for i in range(BOARD_SIZE)]
 # Player Board that guess by AI
-COMPUTER_GUESS_BOARD = [["."] * BOARD_SIZE for i in range(BOARD_SIZE)]
-LETTER = "ABCDEFGHI"
+AI_GUESS_BOARD = [[waterSymbol] * BOARD_SIZE for i in range(BOARD_SIZE)]
+LETTER = "ABCDEFGHIJ"
 
 # print the grid of board
 
@@ -47,6 +43,7 @@ def print_board(board):
     for row in board:
         print("%d|%s|" % (row_number, "|".join(row)))
         row_number += 1
+    
 
 
 # check if ship fits in board
@@ -56,7 +53,9 @@ def checkFitTheShip(shipLength, startRow, startColumn, orientation):
             return False
         else:
             return True
+
     elif orientation == "V":
+
         if startRow + shipLength > BOARD_SIZE:
             return False
         else:
@@ -66,218 +65,236 @@ def checkFitTheShip(shipLength, startRow, startColumn, orientation):
 
 
 def checkShipOverlaping(board, shipLength, startRow, startColumn, orientation):
+
     if orientation == "H":
+        # print("Horizontal alignment:")
+        # for i in range(startRow,shipLength+startRow):
+        #     print(board[startRow][i],end=' ')
+
         for i in range(startColumn, startColumn + shipLength):
-            if board[startRow][i] == "O":
-                return True
-    elif orientation=="V":
+            if board[startRow][i] == boatSymbol:
+                return False
+    elif orientation == "V":
+        # print("\nVertical Alignment:")
+        # for i in range(startColumn,startColumn+shipLength):
+        #     print(board[i][startColumn])
+
         for i in range(startRow, startRow + shipLength):
-            if board[i][startColumn] == "O":
-                return True
-    return False
+            if board[i][startColumn] == boatSymbol:
+                return False
+    return True
 
 # userShip placement
+
+
 def userShipPlacement():
     while True:
         try:
             shipOrientation = input("Enter orientation (H or V): ").upper()
-            if shipOrientation == "H" or shipOrientation == "V":
+            if (shipOrientation == "H" or shipOrientation == "V"):
                 break
             else:
-                print('Wrong!!! Again...',end='')
+                print('Wrong!!! Again...', end='')
         except KeyError:
             print('Again!!! Enter a valid orientation H or V')
     while True:
         try:
-            startRow = int(input("Enter the row 1-9 of the ship start: "))
-            startRow=startRow-1
-            if(0<startRow<BOARD_SIZE):
+            print("Enter the row 1-"+str(BOARD_SIZE) +
+                  " of the ship start: ", end='')
+            startRow = int(input())
+            startRow = startRow-1
+            if(-1 < startRow < BOARD_SIZE):
                 break
             else:
-                print('Wrong!!! Again...',end='')
+                print('Wrong!!! Again...', end='')
         except ValueError:
-            print('Again!!! Enter a valid row number between 1-9')
+            print("Again!!! Enter the row 1-"+str(BOARD_SIZE) +
+                  " of the ship start: ", end='')
     while True:
         try:
-            column = input(
-                "Enter the column (A-I) of the ship start: ").upper()
+            print('Enter the column (' +
+                  LETTER[0]+'-'+LETTER[BOARD_SIZE-1]+') of the ship start: ', end='')
+            column = input().upper()
             if column in LETTER:
-                startColumn=int(ord(column)-ord('A'))
+                startColumn = int(ord(column)-ord('A'))
                 break
             else:
-                print('Wrong!!! Again...',end='')
+                print('Wrong!!! Again...', end='')
         except KeyError:
-            print('Again!!! Enter a valid letter between A-H')
+            print('Again!!! Enter the column (' +
+                  LETTER[0]+'-'+LETTER[BOARD_SIZE-1]+') of the ship start: ')
     return startRow, startColumn, shipOrientation
 
-###create ship length
+# create a ship with ship length
+
+
 def createShipLength():
-    global totalShipLength,ALL_SHIPS
+    global totalShipLength, ALL_SHIPS
     for i in range(NUMBER_OF_SHIP):
         lengthOfShip = random.randint(MAX_SHIP_LENGHT-3, MAX_SHIP_LENGHT)
         ALL_SHIPS.append(lengthOfShip)
-        totalShipLength=totalShipLength+lengthOfShip
+        totalShipLength = totalShipLength+lengthOfShip
 
 # Place the ship in the ocean
+
+
 def shipPlacement(board):
     global totalShipLength
     # loop through length of ships
     random.seed(time.time())
     for k in range(NUMBER_OF_SHIP):
-        shipLength=ALL_SHIPS[k]
+        shipLength = ALL_SHIPS[k]
         # loop until ship fits and doesn't overlap
         while True:
-            if board==COMPUTER_BOARD:
+            if (board == AI_BOARD):
                 shipOrientation = random.choice(["H", "V"])
                 startRow = random.randint(0, BOARD_SIZE-1)
                 startColumn = random.randint(0, BOARD_SIZE-1)
                 # check the ship fit or not
                 if (checkFitTheShip(shipLength, startRow, startColumn, shipOrientation)):
                     # check if ship overlaps
-                    if (checkShipOverlaping(board, shipLength, startRow, startColumn, shipOrientation) == False):
+                    if (checkShipOverlaping(board, shipLength, startRow, startColumn, shipOrientation)):
                         # place ship
                         if shipOrientation == "H":
                             for i in range(startColumn, startColumn + shipLength):
-                                board[startRow][i] = "O"
+                                board[startRow][i] = boatSymbol
                         else:
                             for i in range(startRow, startRow + shipLength):
-                                board[i][startColumn] = "O"
+                                board[i][startColumn] = boatSymbol
                         break
-            
-            elif board==PLAYER_BOARD:
-                print("Your current ship lenght is: ",shipLength)
-                # while True:
-                    # print("Enter the length of Ship ",str(numberOfShip+1),"between (2-5): ",end='')
-                    # shipLength = int(input())
-                    # if(shipLength < MAX_SHIP_LENGHT):
-                    #     break
-                    # else:
-                    #     print('Wrong!!! Again...',end='')
-                startRow, startColumn, orientation = userShipPlacement()  # get input from user with validation
-                startRow=int(startRow)
-                startColumn=int(startColumn)
+
+            elif (board == HUMAN_BOARD):
+                print("Your current ship lenght is: ", shipLength)
+                # get input from user with validation
+                startRow, startColumn, orientation = userShipPlacement()
+                startRow = int(startRow)
+                startColumn = int(startColumn)
 
                 if (checkFitTheShip(shipLength, startRow, startColumn, orientation)):
 
-                    # print("ship fit into the board")
                     # check if ship overlaps
-                    if (checkShipOverlaping(board, startRow, startColumn, orientation, shipLength) == False):
+                    if (checkShipOverlaping(board, startRow, startColumn, orientation, shipLength)):
                             # place ship
                         if (orientation == "H"):
                             for i in range(startColumn, startColumn + shipLength):
-                                board[startRow][i] = "O"
-                        elif (orientation=="V"):
+                                board[startRow][i] = boatSymbol
+                        elif (orientation == "V"):
                             for i in range(startRow, startRow + shipLength):
-                                board[i][startColumn] = "O"
+                                board[i][startColumn] = boatSymbol
 
-                        print_board(PLAYER_BOARD)
+                        print_board(HUMAN_BOARD)
                         break
                     else:
-                        print("Your new ship is overlaped to ther ship !!!")
+                        print("Your new ship is overlaped to other ship !!!")
                         print("Please Enter Valid posion")
                 else:
                     print("Your Ship shape out of range")
                     print("Please Enter Valid posion")
 
 
-
-###get input from user where he shoot
-##search the location where shot for attacking the ai
-def userShootingPosion():
+# get input from user where he shoot
+# search the location where shot for attacking the ai
+def userShotingPosion():
     while True:
         try:
-            startRow = int(input("Enter the row number between (1-9) of the shoot posion: "))
-            startRow=startRow-1
-            if(0<=startRow<BOARD_SIZE):
+            print("Enter the row 1-"+str(BOARD_SIZE) +
+                  " of the ship start: ", end='')
+            startRow = int(input())
+            startRow = startRow-1
+            if(0 <= startRow < BOARD_SIZE):
                 break
             else:
-                print('Wrong!!! Again...',end='')
+                print('Wrong!!! Again...', end='')
         except ValueError:
-            print('Again!!! Enter a valid row number between 1-9')
+            print("Again!!! Enter the row 1-" +
+                  str(BOARD_SIZE)+"of the ship start: ", end='')
     while True:
         try:
-            column = input(
-                "Enter the column name between(A-I) of the shoot posion: ").upper()
+            print('Enter the column (' +
+                  LETTER[0]+'-'+LETTER[BOARD_SIZE-1]+') of the ship start: ', end='')
+            column = input().upper()
             if column in LETTER:
-                startColumn=int(ord(column)-ord('A'))
+                startColumn = int(ord(column)-ord('A'))
                 break
             else:
-                print('Wrong!!! Again...',end='')
+                print('Wrong!!! Again...', end='')
         except KeyError:
-            print('Again!!! Enter a valid letter between A-I')
+            print('Again!!! Enter the column (' +
+                  LETTER[0]+'-'+LETTER[BOARD_SIZE-1]+') of the ship start: ')
     return startRow, startColumn
 
-###counter check who is alive Human or AI
+# counter check who is alive Human or AI
 def sinkBoatCounter(board):
-    counter=0
+    counter = 0
     for row in board:
-        for col in board[row]:
-            if(board[row][col]=="X"):
-                counter=counter+1
+        for col in row:
+            if(col == hitShotSymbol):
+                counter = counter+1
     return counter
 
 
-###shoot the board
-def shootTheBoard(board):
-    if (board==PLAYER_GUESS_BOARD):
-        hitRow,hitColumn=userShootingPosion()
-        if(COMPUTER_BOARD[hitRow][hitColumn]=="0"):
-            PLAYER_GUESS_BOARD[hitRow][hitColumn]="X"
+# shoot the board
+def shotTheBoard(board):
+    if (board == HUMAN_GUESS_BOARD):
+        hitRow, hitColumn = userShotingPosion()
+        if(AI_BOARD[hitRow][hitColumn] == boatSymbol):
+            HUMAN_GUESS_BOARD[hitRow][hitColumn] = hitShotSymbol
         else:
-            PLAYER_GUESS_BOARD[hitRow][hitColumn]="*"
-    elif (board==COMPUTER_GUESS_BOARD):
-        hitRow=random.randint(0, BOARD_SIZE-1)
-        hitColumn=random.randint(0, BOARD_SIZE-1)
+            HUMAN_GUESS_BOARD[hitRow][hitColumn] = missShotSymbol
+    elif (board == AI_GUESS_BOARD):
+        hitRow = random.randint(0, BOARD_SIZE-1)
+        hitColumn = random.randint(0, BOARD_SIZE-1)
 
-        if(PLAYER_BOARD[hitRow][hitColumn]=="0"):
-            PLAYER_BOARD[hitRow][hitColumn]="X"
-            COMPUTER_GUESS_BOARD[hitRow][hitColumn]="X"
+        if(HUMAN_BOARD[hitRow][hitColumn] == boatSymbol):
+            HUMAN_BOARD[hitRow][hitColumn] = hitShotSymbol
+            AI_GUESS_BOARD[hitRow][hitColumn] = hitShotSymbol
         else:
-            PLAYER_BOARD[hitRow][hitColumn]="*"
-            COMPUTER_GUESS_BOARD[hitRow][hitColumn]="*"
+            HUMAN_BOARD[hitRow][hitColumn] = missShotSymbol
+            AI_GUESS_BOARD[hitRow][hitColumn] = missShotSymbol
+
 
 def main():
-    ##this function randomly creat a ship length 
+    # this function randomly creat a ship length
     createShipLength()
 
-    print("Computer Board")
-    shipPlacement(COMPUTER_BOARD)
-    print_board(COMPUTER_BOARD)
-    
+    print("AI Board")
+    shipPlacement(AI_BOARD)
+    print_board(AI_BOARD)
+
     print("\n\nYour Sample Board")
-    print_board(PLAYER_BOARD)
-    shipPlacement(PLAYER_BOARD)
+    print_board(HUMAN_BOARD)
+    shipPlacement(HUMAN_BOARD)
 
-    aiAgentAlive=True
-    humanAgentAlive=True
-    humanAgentTurn=True
-    aiAgentTrun=True
+    aiAgentAlive = True
+    humanAgentAlive = True
+    humanAgentTurn = True
+    aiAgentTurn = True
 
-    while aiAgentAlive and humanAgentAlive:
-        while humanAgentTurn:
+    while(aiAgentAlive and humanAgentAlive):
+        while (humanAgentTurn):
             print("Guess Board where you shoot")
-            print_board(PLAYER_GUESS_BOARD)
-            print("Guess the Agent ship:")
-            shootTheBoard(PLAYER_GUESS_BOARD)
-            print_board(PLAYER_GUESS_BOARD)
-            humanAgentTurn=False
-            aiAgentTrun=True
-        ###computer board that player guess
-        if numberOfShinkBoard(PLAYER_GUESS_BOARD)==totalShipLength:
+            print_board(HUMAN_GUESS_BOARD)
+            print("Guess the AI ship in Board:")
+            shotTheBoard(HUMAN_GUESS_BOARD)
+            print_board(HUMAN_GUESS_BOARD)
+            humanAgentTurn = False
+            aiAgentTurn = True
+        # computer board that player guess
+        if (sinkBoatCounter(HUMAN_GUESS_BOARD) == totalShipLength):
             print("Congratulation!!!,You have won the Game")
-            aiAgentAlive=False
+            aiAgentAlive = False
 
-        while aiAgentAlive:
-            shootTheBoard(COMPUTER_GUESS_BOARD)
-            print_board(PLAYER_BOARD)
-            aiAgentTrun=False
-            humanAgentTurn=True
+        while (aiAgentTurn):
+            shotTheBoard(AI_GUESS_BOARD)
+            print("\n \After AI shoot")
+            print_board(HUMAN_BOARD)
+            aiAgentTurn = False
+            humanAgentTurn = True
 
-        ##human board -that Computer Guess
-        if numberOfShinkBoard(COMPUTER_GUESS_BOARD)==totalShipLength:
+        # human board -that Computer Guess
+        if (sinkBoatCounter(AI_GUESS_BOARD) == totalShipLength):
             print("Sorry!!!,You have loss the Game")
-            humanAgentAlive=False   
-
+            humanAgentAlive = False
 
 
 if __name__ == '__main__':
