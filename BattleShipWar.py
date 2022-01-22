@@ -5,15 +5,15 @@ BOARD_SIZE = 9
 ALL_SHIPS = []
 # ##Define the maximum length of ship
 MAX_SHIP_LENGHT = 5
-NUMBER_OF_SHIP = 1
+NUMBER_OF_SHIP = 2
 
 totalShipLength = 0
 
 # symbol
 boatSymbol = "@"
 waterSymbol = "~"
-hitShotSymbol = "X"
-missShotSymbol = "*"
+hitShootSymbol = "X"
+missShootSymbol = "*"
 
 # Boad already created
 # player own board
@@ -43,7 +43,6 @@ def print_board(board):
     for row in board:
         print("%d|%s|" % (row_number, "|".join(row)))
         row_number += 1
-    
 
 
 # check if ship fits in board
@@ -67,17 +66,12 @@ def checkFitTheShip(shipLength, startRow, startColumn, orientation):
 def checkShipOverlaping(board, shipLength, startRow, startColumn, orientation):
 
     if orientation == "H":
-        # print("Horizontal alignment:")
-        # for i in range(startRow,shipLength+startRow):
-        #     print(board[startRow][i],end=' ')
 
         for i in range(startColumn, startColumn + shipLength):
             if board[startRow][i] == boatSymbol:
                 return False
+
     elif orientation == "V":
-        # print("\nVertical Alignment:")
-        # for i in range(startColumn,startColumn+shipLength):
-        #     print(board[i][startColumn])
 
         for i in range(startRow, startRow + shipLength):
             if board[i][startColumn] == boatSymbol:
@@ -173,7 +167,7 @@ def shipPlacement(board):
                 if (checkFitTheShip(shipLength, startRow, startColumn, orientation)):
 
                     # check if ship overlaps
-                    if (checkShipOverlaping(board, startRow, startColumn, orientation, shipLength)):
+                    if (checkShipOverlaping(board, shipLength, startRow, startColumn, orientation)):
                             # place ship
                         if (orientation == "H"):
                             for i in range(startColumn, startColumn + shipLength):
@@ -193,8 +187,8 @@ def shipPlacement(board):
 
 
 # get input from user where he shoot
-# search the location where shot for attacking the ai
-def userShotingPosion():
+# search the location where shoot for attacking the ai
+def userShootingPosion():
     while True:
         try:
             print("Enter the row 1-"+str(BOARD_SIZE) +
@@ -224,11 +218,13 @@ def userShotingPosion():
     return startRow, startColumn
 
 # counter check who is alive Human or AI
+
+
 def sinkBoatCounter(board):
     counter = 0
     for row in board:
         for col in row:
-            if(col == hitShotSymbol):
+            if(col == hitShootSymbol):
                 counter = counter+1
     return counter
 
@@ -236,21 +232,21 @@ def sinkBoatCounter(board):
 # shoot the board
 def shotTheBoard(board):
     if (board == HUMAN_GUESS_BOARD):
-        hitRow, hitColumn = userShotingPosion()
+        hitRow, hitColumn = userShootingPosion()
         if(AI_BOARD[hitRow][hitColumn] == boatSymbol):
-            HUMAN_GUESS_BOARD[hitRow][hitColumn] = hitShotSymbol
+            HUMAN_GUESS_BOARD[hitRow][hitColumn] = hitShootSymbol
         else:
-            HUMAN_GUESS_BOARD[hitRow][hitColumn] = missShotSymbol
+            HUMAN_GUESS_BOARD[hitRow][hitColumn] = missShootSymbol
     elif (board == AI_GUESS_BOARD):
         hitRow = random.randint(0, BOARD_SIZE-1)
         hitColumn = random.randint(0, BOARD_SIZE-1)
 
         if(HUMAN_BOARD[hitRow][hitColumn] == boatSymbol):
-            HUMAN_BOARD[hitRow][hitColumn] = hitShotSymbol
-            AI_GUESS_BOARD[hitRow][hitColumn] = hitShotSymbol
+            HUMAN_BOARD[hitRow][hitColumn] = hitShootSymbol
+            AI_GUESS_BOARD[hitRow][hitColumn] = hitShootSymbol
         else:
-            HUMAN_BOARD[hitRow][hitColumn] = missShotSymbol
-            AI_GUESS_BOARD[hitRow][hitColumn] = missShotSymbol
+            HUMAN_BOARD[hitRow][hitColumn] = missShootSymbol
+            AI_GUESS_BOARD[hitRow][hitColumn] = missShootSymbol
 
 
 def main():
