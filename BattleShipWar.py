@@ -1,11 +1,10 @@
 import time
 import random
-
 BOARD_SIZE = 9
 ALL_SHIPS = []
 # ##Define the maximum length of ship
-MAX_SHIP_LENGHT = 5
-NUMBER_OF_SHIP = 2
+MAX_SHIP_LENGHT = 6
+NUMBER_OF_SHIP = 5
 
 totalShipLength = 0
 
@@ -13,7 +12,7 @@ totalShipLength = 0
 boatSymbol = "@"
 waterSymbol = "~"
 hitShootSymbol = "X"
-missShootSymbol = "*"
+missShootSymbol = "#"
 
 # Boad already created
 # player own board
@@ -158,6 +157,24 @@ def shipPlacement(board):
                         break
 
             elif (board == HUMAN_BOARD):
+                ###randomly generate
+                shipOrientation = random.choice(["H", "V"])
+                startRow = random.randint(0, BOARD_SIZE-1)
+                startColumn = random.randint(0, BOARD_SIZE-1)
+                # check the ship fit or not
+                if (checkFitTheShip(shipLength, startRow, startColumn, shipOrientation)):
+                    # check if ship overlaps
+                    if (checkShipOverlaping(board, shipLength, startRow, startColumn, shipOrientation)):
+                        # place ship
+                        if shipOrientation == "H":
+                            for i in range(startColumn, startColumn + shipLength):
+                                board[startRow][i] = boatSymbol
+                        else:
+                            for i in range(startRow, startRow + shipLength):
+                                board[i][startColumn] = boatSymbol
+                        break
+
+'''
                 print("Your current ship lenght is: ", shipLength)
                 # get input from user with validation
                 startRow, startColumn, orientation = userShipPlacement()
@@ -185,6 +202,7 @@ def shipPlacement(board):
                     print("Your Ship shape out of range")
                     print("Please Enter Valid posion")
 
+'''
 
 # get input from user where he shoot
 # search the location where shoot for attacking the ai
@@ -228,26 +246,76 @@ def sinkBoatCounter(board):
                 counter = counter+1
     return counter
 
-
+aiFirstHitShoot=False
+aiSuccessFullHit=[]
 # shoot the board
 def shotTheBoard(board):
+    global aiFirstHitShoot,aiSuccessFullHit
     if (board == HUMAN_GUESS_BOARD):
         hitRow, hitColumn = userShootingPosion()
         if(AI_BOARD[hitRow][hitColumn] == boatSymbol):
+            print("Human Success full hit: ",hitRow," ",hitColumn)
             HUMAN_GUESS_BOARD[hitRow][hitColumn] = hitShootSymbol
         else:
+            print("Human Miss hit")
             HUMAN_GUESS_BOARD[hitRow][hitColumn] = missShootSymbol
+
     elif (board == AI_GUESS_BOARD):
-        hitRow = random.randint(0, BOARD_SIZE-1)
-        hitColumn = random.randint(0, BOARD_SIZE-1)
+        hitRow = -1
+        hitColumn = -1
+        if aiFirstHitShoot == False:
+            while True:
+                hitRow = random.randint(0, BOARD_SIZE-1)
+                hitColumn = random.randint(0, BOARD_SIZE-1)
+                if (AI_GUESS_BOARD[hitRow][hitColumn]==waterSymbol):
+                    break
+            print('EIJEEEE EIJEEEEE EIJEEEEE')
+        else:
+            dx = [1,-1,0,0]
+            dy = [0,0,1,-1]
+            print("Ai Successfull hit",aiSuccessFullHit)
+            flag = False
+            for x in range(0,len(aiSuccessFullHit)):
+                for i in range(0,4):
+                    hitRow = aiSuccessFullHit[x][0] + dx[i]
+                    hitColumn = aiSuccessFullHit[x][1]+ dy[i]
+                    if (hitRow>=0 and hitRow<9 and hitColumn>=0 and hitColumn<9):
+                        #nothing
+                        pass
+                    else:
+                        continue
+                        
+                    if AI_GUESS_BOARD[hitRow][hitColumn] == hitShootSymbol or AI_GUESS_BOARD[hitRow][hitColumn] == missShootSymbol:
+                        continue 
+                    if(HUMAN_BOARD[hitRow][hitColumn] == boatSymbol):
+                        flag = True
+                        break
+                if flag==True:
+                    break
+        
+            if flag == False:
+                print('NO MAMU NOOOOOOOO')
+                aiSuccessFullHit = []
+                while True:
+                    hitRow = random.randint(0, BOARD_SIZE-1)
+                    hitColumn = random.randint(0, BOARD_SIZE-1)
+                    if (AI_GUESS_BOARD[hitRow][hitColumn]==waterSymbol):
+                        break
+        
+            
+            
 
         if(HUMAN_BOARD[hitRow][hitColumn] == boatSymbol):
+            if aiFirstHitShoot == False:
+                aiFirstHitShoot=True
             HUMAN_BOARD[hitRow][hitColumn] = hitShootSymbol
             AI_GUESS_BOARD[hitRow][hitColumn] = hitShootSymbol
+            aiSuccessFullHit.append([hitRow,hitColumn])
+            print("AI Sucessfull hit: ",hitRow," ",hitColumn)
         else:
             HUMAN_BOARD[hitRow][hitColumn] = missShootSymbol
             AI_GUESS_BOARD[hitRow][hitColumn] = missShootSymbol
-
+            print("Ai miss hit: ",hitRow," ",hitColumn)
 
 def main():
     # this function randomly creat a ship length
@@ -257,10 +325,11 @@ def main():
     shipPlacement(AI_BOARD)
     print_board(AI_BOARD)
 
-    print("\n\nYour Sample Board")
-    print_board(HUMAN_BOARD)
+    # print("\n\nYour Sample Board")
     shipPlacement(HUMAN_BOARD)
-
+    print("\n Your Board After Ship placement")
+    print_board(HUMAN_BOARD)
+    
     aiAgentAlive = True
     humanAgentAlive = True
     humanAgentTurn = True
@@ -268,7 +337,7 @@ def main():
 
     while(aiAgentAlive and humanAgentAlive):
         while (humanAgentTurn):
-            print("Guess Board where you shoot")
+            print("AI Board where you shoot")
             print_board(HUMAN_GUESS_BOARD)
             print("Guess the AI ship in Board:")
             shotTheBoard(HUMAN_GUESS_BOARD)
@@ -282,7 +351,7 @@ def main():
 
         while (aiAgentTurn):
             shotTheBoard(AI_GUESS_BOARD)
-            print("\n \After AI shoot")
+            print("\n After AI shoot, Your board situation:")
             print_board(HUMAN_BOARD)
             aiAgentTurn = False
             humanAgentTurn = True
