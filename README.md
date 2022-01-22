@@ -2,19 +2,17 @@
 
 ## Instruciton:
 
-1. A 10x10 grid will have 8 ships of variable length randomly placed about
-2. You will have 50 bullets to take down the ships that are placed down
-3. You can choose a row and column such as A3 to indicate where to shoot
+1. A 9x9 grid will have 4 ships of variable length that length is randomly generate 
+2. Bullet is not limited ,Game is not over until Human or AI win 
+3. You can choose a row and column such as 3 and B to indicate where you shoot
 4. For every shot that hits or misses it will show up in the grid
-5. A ship cannot be placed diagonally, so if a shot hits the rest of
-    the ship is in one of 4 directions, left, right, up, and down
-6. If all ships are unearthed before using up all bullets, you win
-        else, you lose
+5. A ship cannot be placed diagonally,you can only place the ship only Horizontal and Vertically 
+6. If you sunk all ships of AI ,you will.but AI sunk all ships of you,AI win.Actually winer will select who can sink all boat of opponent. 
 
 
  Legend:
  
-    1. "~" = water or empty space
+    1. "~" = water 
 
     2. "@" = part of ship
 
