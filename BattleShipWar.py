@@ -157,7 +157,7 @@ def shipPlacement(board):
                         break
 
             elif (board == HUMAN_BOARD):
-                ###randomly generate
+                # randomly generate
                 shipOrientation = random.choice(["H", "V"])
                 startRow = random.randint(0, BOARD_SIZE-1)
                 startColumn = random.randint(0, BOARD_SIZE-1)
@@ -174,6 +174,8 @@ def shipPlacement(board):
                                 board[i][startColumn] = boatSymbol
                         break
 
+
+# manually place the ship
 '''
                 print("Your current ship lenght is: ", shipLength)
                 # get input from user with validation
@@ -206,6 +208,8 @@ def shipPlacement(board):
 
 # get input from user where he shoot
 # search the location where shoot for attacking the ai
+
+
 def userShootingPosion():
     while True:
         try:
@@ -246,15 +250,18 @@ def sinkBoatCounter(board):
                 counter = counter+1
     return counter
 
-aiFirstHitShoot=False
-aiSuccessFullHit=[]
+
+aiFirstHitShoot = False
+aiSuccessFullHit = []
 # shoot the board
+
+
 def shotTheBoard(board):
-    global aiFirstHitShoot,aiSuccessFullHit
+    global aiFirstHitShoot, aiSuccessFullHit
     if (board == HUMAN_GUESS_BOARD):
         hitRow, hitColumn = userShootingPosion()
         if(AI_BOARD[hitRow][hitColumn] == boatSymbol):
-            print("Human Success full hit: ",hitRow," ",hitColumn)
+            print("Human Success full hit: ", hitRow, " ", hitColumn)
             HUMAN_GUESS_BOARD[hitRow][hitColumn] = hitShootSymbol
         else:
             print("Human Miss hit")
@@ -267,55 +274,53 @@ def shotTheBoard(board):
             while True:
                 hitRow = random.randint(0, BOARD_SIZE-1)
                 hitColumn = random.randint(0, BOARD_SIZE-1)
-                if (AI_GUESS_BOARD[hitRow][hitColumn]==waterSymbol):
+                if (AI_GUESS_BOARD[hitRow][hitColumn] == waterSymbol):
                     break
-            print('EIJEEEE EIJEEEEE EIJEEEEE')
+            # print('EIJEEEE EIJEEEEE EIJEEEEE')
         else:
-            dx = [1,-1,0,0]
-            dy = [0,0,1,-1]
-            print("Ai Successfull hit",aiSuccessFullHit)
+            dx = [1, -1, 0, 0]
+            dy = [0, 0, 1, -1]
+            print("Ai Successfull hit", aiSuccessFullHit)
             flag = False
-            for x in range(0,len(aiSuccessFullHit)):
-                for i in range(0,4):
+            for x in range(0, len(aiSuccessFullHit)):
+                for i in range(0, 4):
                     hitRow = aiSuccessFullHit[x][0] + dx[i]
-                    hitColumn = aiSuccessFullHit[x][1]+ dy[i]
-                    if (hitRow>=0 and hitRow<9 and hitColumn>=0 and hitColumn<9):
-                        #nothing
+                    hitColumn = aiSuccessFullHit[x][1] + dy[i]
+                    if (hitRow >= 0 and hitRow < 9 and hitColumn >= 0 and hitColumn < 9):
+                        # nothing
                         pass
                     else:
                         continue
-                        
+
                     if AI_GUESS_BOARD[hitRow][hitColumn] == hitShootSymbol or AI_GUESS_BOARD[hitRow][hitColumn] == missShootSymbol:
-                        continue 
+                        continue
                     if(HUMAN_BOARD[hitRow][hitColumn] == boatSymbol):
                         flag = True
                         break
-                if flag==True:
+                if flag == True:
                     break
-        
+
             if flag == False:
-                print('NO MAMU NOOOOOOOO')
+                # print('NO MAMU NOOOOOOOO')
                 aiSuccessFullHit = []
                 while True:
                     hitRow = random.randint(0, BOARD_SIZE-1)
                     hitColumn = random.randint(0, BOARD_SIZE-1)
-                    if (AI_GUESS_BOARD[hitRow][hitColumn]==waterSymbol):
+                    if (AI_GUESS_BOARD[hitRow][hitColumn] == waterSymbol):
                         break
-        
-            
-            
 
         if(HUMAN_BOARD[hitRow][hitColumn] == boatSymbol):
             if aiFirstHitShoot == False:
-                aiFirstHitShoot=True
+                aiFirstHitShoot = True
             HUMAN_BOARD[hitRow][hitColumn] = hitShootSymbol
             AI_GUESS_BOARD[hitRow][hitColumn] = hitShootSymbol
-            aiSuccessFullHit.append([hitRow,hitColumn])
-            print("AI Sucessfull hit: ",hitRow," ",hitColumn)
+            aiSuccessFullHit.append([hitRow, hitColumn])
+            print("AI Sucessfull hit: ", hitRow, " ", hitColumn)
         else:
             HUMAN_BOARD[hitRow][hitColumn] = missShootSymbol
             AI_GUESS_BOARD[hitRow][hitColumn] = missShootSymbol
-            print("Ai miss hit: ",hitRow," ",hitColumn)
+            print("Ai miss hit: ", hitRow, " ", hitColumn)
+
 
 def main():
     # this function randomly creat a ship length
@@ -329,7 +334,7 @@ def main():
     shipPlacement(HUMAN_BOARD)
     print("\n Your Board After Ship placement")
     print_board(HUMAN_BOARD)
-    
+
     aiAgentAlive = True
     humanAgentAlive = True
     humanAgentTurn = True
@@ -348,6 +353,8 @@ def main():
         if (sinkBoatCounter(HUMAN_GUESS_BOARD) == totalShipLength):
             print("Congratulation!!!,You have won the Game")
             aiAgentAlive = False
+            aiAgentTurn=False
+            break
 
         while (aiAgentTurn):
             shotTheBoard(AI_GUESS_BOARD)
@@ -360,6 +367,8 @@ def main():
         if (sinkBoatCounter(AI_GUESS_BOARD) == totalShipLength):
             print("Sorry!!!,You have loss the Game")
             humanAgentAlive = False
+            humanAgentTurn=False
+            break
 
 
 if __name__ == '__main__':
